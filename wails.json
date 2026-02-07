@@ -1,0 +1,31 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "TeleTurbo",
+  "outputfilename": "TeleTurbo",
+  "frontend": {
+    "dir": "./frontend",
+    "install": "npm install",
+    "build": "npm run build",
+    "dev": "npm run dev",
+    "package": ""
+  },
+  "wailsjsdir": "./frontend",
+  "version": "2",
+  "Args": [],
+  "Build": {
+    "mode": "production",
+    "args": []
+  },
+  "Info": {
+    "productName": "TeleTurbo",
+    "companyName": "TeleTurbo",
+    "productVersion": "1.0.0",
+    "copyright": "© 2024 TeleTurbo",
+    "comments": "High-Speed Telegram Downloader"
+  },
+  "Mac": {
+    "category": "public.app-category.utilities",
+    "iconName": "appicon"
+  },
+  "runNonBlocking": false
+}

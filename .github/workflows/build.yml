@@ -1,0 +1,112 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build Windows exe
+        run: wails build -platform windows/amd64
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TeleTurbo-windows
+          path: build/bin/TeleTurbo.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build macOS app
+        run: wails build -platform darwin/arm64
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          create-dmg \
+            --volname "TeleTurbo" \
+            --volicon "build/appicon.icns" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "TeleTurbo.app" 150 185 \
+            --hide-extension "TeleTurbo.app" \
+            --app-drop-link 450 185 \
+            "build/bin/TeleTurbo.dmg" \
+            "build/bin/TeleTurbo.app"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TeleTurbo-macos
+          path: build/bin/TeleTurbo.dmg
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: TeleTurbo ${{ github.ref_name }}
+          body: |
+            ## TeleTurbo ${{ github.ref_name }}
+
+            High-speed Telegram file downloader with parallel chunked downloads.
+
+            ### Downloads
+            - **macOS** (Apple Silicon): `TeleTurbo.dmg`
+            - **Windows** (x64): `TeleTurbo.exe`
+
+            ### First Launch
+            1. Get API credentials from [my.telegram.org](https://my.telegram.org)
+            2. Enter App ID + App Hash
+            3. Login with phone number + OTP
+            4. Paste Telegram link and download
+          files: |
+            TeleTurbo-windows/TeleTurbo.exe
+            TeleTurbo-macos/TeleTurbo.dmg
