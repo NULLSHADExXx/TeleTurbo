@@ -9,6 +9,8 @@ Download files from any Telegram channel at maximum speed using multi-threaded p
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-blue)]()
 [![License](https://img.shields.io/badge/License-MIT-green)]()
 
+![TeleTurbo Screenshot](screenshot.png)
+
 </div>
 
 ---
